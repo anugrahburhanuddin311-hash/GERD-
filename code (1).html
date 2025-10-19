@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <title>GERD Simple Quest</title>
+    <style>
+        body { font-family: Arial; text-align: center; background: #87CEEB; color: #333; margin: 0; padding: 20px; }
+        #game { width: 800px; height: 600px; margin: 0 auto; background: #98FB98; border: 2px solid #000; position: relative; overflow: hidden; }
+        #avatar { position: absolute; width: 50px; height: 50px; background: #4CAF50; bottom: 20px; left: 50px; transition: left 0.5s; }
+        .object { position: absolute; width: 50px; height: 50px; background: #FFD700; cursor: pointer; }
+        .tree { background: #8B4513; }
+        .boss { background: #FF0000; width: 100px; height: 100px; }
+        #question { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 24px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 10px; display: none; }
+        button { padding: 10px; margin: 5px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        #result { font-size: 18px; margin-top: 20px; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    </style>
+</head>
+<body>
+    <h1>GERD Simple Quest</h1>
+    <p>Klik objek untuk mulai! Jawab benar untuk lanjut level.</p>
+    <div id="game">
+        <div id="avatar">🦸</div>
+        <div id="chest" class="object" style="bottom: 100px; right: 100px;">📦</div>
+        <div id="question">
+            <p id="qText"></p>
+            <button id="opt1"></button>
+            <button id="opt2"></button>
+        </div>
+    </div>
+    <p id="result"></p>
+    <button id="restart" style="display:none;" onclick="restartGame()">Restart</button>
+
+    <script>
+        let level = 1;
+        let score = 0;
+        const avatar = document.getElementById('avatar');
+        const chest = document.getElementById('chest');
+        const question = document.getElementById('question');
+        const qText = document.getElementById('qText');
+        const opt1 = document.getElementById('opt1');
+        const opt2 = document.getElementById('opt2');
+        const result = document.getElementById('result');
+        const restartBtn = document.getElementById('restart');
+
+        function startLevel() {
+            if (level === 1) {
+                chest.style.display = 'block';
+                chest.onclick = () => showQuestion('Apa itu GERD?', 'Penyakit refluks asam', 'Sakit gigi', true);
+            } else if (level === 2) {
+                chest.style.display = 'none';
+                const tree = document.createElement('div');
+                tree.id = 'tree';
+                tree.className = 'object tree';
+                tree.style.bottom = '100px';
+                tree.style.right = '100px';
+                tree.innerHTML = '🌳';
+                tree.onclick = () => showQuestion('Gejala GERD?', 'Heartburn', 'Sakit mata', true);
+                document.getElementById('game').appendChild(tree);
+            } else if (level === 3) {
+                document.getElementById('tree').style.display = 'none';
+                const boss = document.createElement('div');
+                boss.id = 'boss';
+                boss.className = 'object boss';
+                boss.style.bottom = '100px';
+                boss.style.right = '100px';
+                boss.innerHTML = '👹';
+                boss.onclick = () => showQuestion('Obat GERD?', 'Antasida', 'Obat flu', true);
+                document.getElementById('game').appendChild(boss);
+            }
+        }
+
+        function showQuestion(text, optA, optB, correctA) {
+            qText.textContent = text;
+            opt1.textContent = optA;
+            opt2.textContent = optB;
+            question.style.display = 'block';
+            opt1.onclick = () => checkAnswer(correctA);
+            opt2.onclick = () => checkAnswer(!correctA);
+        }
+
+        function checkAnswer(correct) {
+            question.style.display = 'none';
+            if (correct) {
+                score += 10;
+                result.textContent = 'Benar! Poin: ' + score + '. Lanjut level!';
+                level++;
+                if (level > 3) {
+                    result.textContent = 'Selamat! Kamu menang! Total Poin: ' + score;
+                    restartBtn.style.display = 'block';
+                } else {
+                    setTimeout(startLevel, 1000);
+                }
+            } else {
+                result.textContent = 'Salah! Hint: Coba lagi.';
+                document.getElementById('game').classList.add('shake');
+                setTimeout(() => document.getElementById('game').classList.remove('shake'), 500);
+            }
+        }
+
+        function restartGame() {
+            level = 1;
+            score = 0;
+            result.textContent = '';
+            restartBtn.style.display = 'none';
+            document.getElementById('tree')?.remove();
+            document.getElementById('boss')?.remove();
+            startLevel();
+        }
+
+        // Kontrol avatar sederhana (opsional)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') avatar.style.left = (parseInt(avatar.style.left) - 10) + 'px';
+            if (e.key === 'ArrowRight') avatar.style.left = (parseInt(avatar.style.left) + 10) + 'px';
+        });
+
+        startLevel(); // Mulai game
+    </script>
+</body>
+</html>
